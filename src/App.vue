@@ -4,16 +4,16 @@
   </section>
   <Renderer
     ref="renderer"
-    antialias
-    :orbit-ctrl="{enableDamping: true}"
+    orbit-ctrl
     resize="window"
-    :pointer="{ onMove: onPointerMove }"
-    shadow>
-    <Camera ref="camera" :position="{x: 20, y: 30, z: 0}"/>
+    :pointer="{onMove: onPointerMove}"
+    >
+    <Camera ref="camera" :position="{x: 20, y: 30, z: 0}" />
     <Scene ref="scene" :background="cubeTexture">
+    <!-- <Scene ref="scene"> -->
       <PointLight
         ref="mouse"
-        :intensity="0.1"
+        :intensity="0"
         cast-shadow>
         <Sphere :radius="0.1" />
       </PointLight>
@@ -21,9 +21,16 @@
         ref="main"
         :position="{ y: 40 }"
         :intensity="brightness"
-        cast-shadow>
-      </PointLight>
-      <AmbientLight />
+        cast-shadow/>
+      <PointLight
+        ref="flash"
+        :position="{x: 200,   y: 300, z: 100}"
+        :intensity="30"
+        :decay="1.7"  
+        :distance="500"
+        color="#062d89"
+        />
+
       <!-- <FbxModel src="/assets/models/Dying.fbx"
         @load="onLoad" 
         :position="{y: 5, z: -10}"
@@ -31,6 +38,29 @@
       <!-- <GltfModel src="/assets/models/pony_cartoon/scene.gltf" 
       :position="{y: 5, z: -10}"
       /> -->
+
+      <Plane
+      v-for="i in 25"
+      :ref="`mesh${i}`"
+      :width="500"
+      :height="500"
+      :position="{x: Math.random()*800-400, y: 500, z: Math.random()*500-450 }"
+      :rotation="{x: 1.16, y: -0.12, z: Math.random()*360}"
+      >
+        <LambertMaterial
+        :props="{transparent: true, opacity: 0.6, depthWrite:false}">
+          <Texture src="/assets/textures/smoke.png" />
+        </LambertMaterial>
+      </Plane>
+
+      <LiquidPlane
+        ref="liquid"
+        :width="20"
+        :height="20"
+        :material-props="materialProps"
+        :rotation="{ x: -Math.PI / 2 }"/>
+
+
       <CannonWorld :gravity="{ x: 0, y: -9.82, z: 0}" @before-step="onBeforeStep"> 
         <Sphere
           v-for="item in balls"
@@ -51,56 +81,49 @@
           cast-shadow>
           <PhongMaterial color="#ffffff" />
         </Sphere>
-        <!-- <Box
-          :width="100"
-          :depth="100"
-          :position="{x:0, y: -1, z: 0}"
+        <Box
+          :width="20"
+          :depth="20"
+          :position="{x:0, y: -10, z: 0}"
           receive-shadow>
-          <StandardMaterial :props="{ displacementScale: 0.2 }">
+           <StandardMaterial :props="{ displacementScale: 0.2 }">
             <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_basecolor.jpg" />
             <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_height.png" name="displacementMap" />
             <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_normal.jpg" name="normalMap" />
             <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_roughness.jpg" name="roughnessMap" />
             <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_ambientOcclusion.jpg" name="aoMap" />
-          </StandardMaterial>
-        </Box> -->
-        
+          </StandardMaterial> 
+        </Box>  
       </CannonWorld>
      
-      <LiquidPlane
-          ref="liquid"
-          :width="WIDTH"
-          :height="HEIGHT"
-          :roughness="roughness"
-          :metalness="metalness"
-          :width-segments="512" 
-          :height-segments="512"
-          :rotation="{ x: -Math.PI / 2 }"/>
+      
      
     </Scene>
   </Renderer>
 </template>
 
 <script>
+//TODO: setAttribute for rain drops
+
 import * as THREE from 'three';
 import CannonWorld from 'troisjs/src/components/physics/CannonWorld.js';
-import LiquidPlane from 'troisjs/src/components/liquid/LiquidPlane.js';
+import LiquidPlane from '@troisjs/components/src/liquid/LiquidPlane.js'
 import {Pane} from 'tweakpane';
 import niceColors from 'nice-color-palettes';
 export default {
   components:{
     CannonWorld,
-    LiquidPlane
+    LiquidPlane,
   },
   setup(){
     //skybox
     let imageArray = [
-    '/assets/skybox/tears_ft.jpg',
-    '/assets/skybox/tears_bk.jpg',
-    '/assets/skybox/tears_up.jpg',
-    '/assets/skybox/tears_dn.jpg',
-    '/assets/skybox/tears_rt.jpg',
-    '/assets/skybox/tears_lf.jpg',];
+    '/assets/skybox/battery_ft.jpg',
+    '/assets/skybox/battery_bk.jpg',
+    '/assets/skybox/battery_up.jpg',
+    '/assets/skybox/battery_dn.jpg',
+    '/assets/skybox/battery_rt.jpg',
+    '/assets/skybox/battery_lf.jpg',];
 
     const cubeTexture = new THREE.CubeTextureLoader().load(imageArray)
     
@@ -117,50 +140,104 @@ export default {
     for (var i = 0; i < coords.length; i++){
       balls.push({position: coords[i], color: colors[i]})
     }
+    
+    const initBalls = (mesh) => {mesh.userData.mass = 1}
+
+    //Loading Manager
+    THREE.DefaultLoadingManager.onLoad =  () => {
+      console.log('Loading Complete!');
+      document.getElementById("loading-screen").remove();
+    }
+
     return{
       cubeTexture,
-      balls
-    }
-  },
-  data(){
-    return{
-      isInit: true,
+      balls,
+      initBalls,
       texturesProps: {
         repeat: { x: 5, y: 5 },
         wrapS: THREE.RepeatWrapping,
         wrapT: THREE.RepeatWrapping,
       },
-      brightness: 1,
+      
+    }
+  },
+  data(){
+    return{
+      materialProps: {
+        color: 0xffffff,
+        metalness: 0.2,
+        roughness: 0,
+        thickness: 4,
+        transmission: 1,
+        displacementScale: 20,
+        envMap: this.cubeTexture,
+        envMapIntensity: 1
+      },
+      //init
+      isInit: true,
+      //light
+      brightness: 0.7,
+      //liquid
       color: 0xffffff,
       metalness: 0.7,
       roughness: 0.2,
-      WIDTH: 20,
-      HEIGHT: 20,
-    }
-  },
-  //load mng
-  beforeCreate() {
-    THREE.DefaultLoadingManager.onLoad =  () => {
-      console.log('Loading Complete!');
-      document.getElementById("loading-screen").remove();
+      //rain
+      rainCount: 15000
     }
   },
   mounted() {
     //tweakpane
     this.pane = new Pane();
     this.pane.addInput(this, 'brightness', { min: 0, max: 3 });
-    this.pane.addInput(this, 'metalness', { min: 0, max: 1 });
-    this.pane.addInput(this, 'roughness', { min: 0, max: 1 });
+    this.pane.addInput(this.materialProps, 'metalness', { min: 0, max: 1 });
+    this.pane.addInput(this.materialProps, 'roughness', { min: 0, max: 1 });
+    this.pane.addInput(this.materialProps, 'envMapIntensity', { step: 0.05, min: 0, max: 1 })
 
     //scene core
     const renderer = this.$refs.renderer;
     const scene = this.$refs.scene.scene;
+    const flash = this.$refs.flash.light;
 
     //main light helper
     const main = this.$refs.main.light;
     const lightHelper = new THREE.PointLightHelper(main)
     scene.add(lightHelper);
 
+    //mouse lantern
+    const mouse = this.$refs.mouse.light;
+    this.pointer = renderer.three.pointer
+    const mouseV3 = this.pointer.positionV3;
+
+    //rain
+     const rainMaterial = new THREE.PointsMaterial({
+      color: 0xaaaaaa,
+      size: 0.1,
+      transparent: true
+    }); 
+      //lower rain
+    let lowerGeo = new THREE.BufferGeometry();
+    let lowerVert = new Float32Array(this.rainCount*3)
+    for(let i = 0; i < this.rainCount; i++) {
+      lowerVert[i*3] = Math.random() * 400 -200,
+      lowerVert[i*3 + 1] =  Math.random() * 250,
+      lowerVert[i*3 + 2] =  Math.random() * 400 - 200
+    }
+    lowerGeo.setAttribute('position', new THREE.BufferAttribute( lowerVert, 3 ));
+    const lowerRain = new THREE.Points(lowerGeo, rainMaterial);
+      //upper rain
+    let upperGeo = new THREE.BufferGeometry();
+    let upperVert = new Float32Array(this.rainCount*3)
+    for(let i = 0; i < this.rainCount; i++) {
+      upperVert[i*3] = Math.random() * 400 -200,
+      upperVert[i*3 + 1] =  Math.random() * 250,
+      upperVert[i*3 + 2] =  Math.random() * 400 - 200
+    }
+    upperGeo.setAttribute('position', new THREE.BufferAttribute( upperVert, 3 ) );
+    const upperRain = new THREE.Points(upperGeo, rainMaterial);
+    scene.add(lowerRain)
+    scene.add(upperRain)
+    upperRain.position.set(0, 250, 0);
+    
     //liquid
     this.liquidEffect = this.$refs.liquid.liquidEffect;
     this.liquidEffect.addDrop(0, 0, 0.05, 0.05);
@@ -168,24 +245,55 @@ export default {
     this.raycaster = new THREE.Raycaster();
     this.pointerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this.pointerV3 = new THREE.Vector3();
-    
-    //lantern
-    const mouse = this.$refs.mouse.light;
-    this.pointer = renderer.three.pointer
-    const mouseV3 = this.pointer.positionV3;
 
+
+    //ANIMATION LOOP
     renderer.onBeforeRender(() => {
+      //mouse
       mouse.position.copy(mouseV3);
+      //rain
+      
+      if (lowerRain.position.y < -300){
+        lowerRain.position.y = 200
+      }
+      if (upperRain.position.y < -300){
+        upperRain.position.y = 200
+      }
+      lowerRain.position.y -= 2
+      upperRain.position.y -= 2
+      
+      //cloud
+      for (let i = 1; i <= 25; i++) {
+        let mesh = this.$refs['mesh'+i].mesh;
+        mesh.rotation.z -= 0.002;
+      }
+      //thunder
+      if(Math.random() > 0.93 || flash.power > 100) {
+        if(flash.power < 100) 
+          flash.position.set(
+            Math.random()*400,
+            300 + Math.random() *200,
+            100
+          );
+        flash.power = 50 + Math.random() * 500;
+      }
     })
   },
-  unmounted() {
-    this.pane.dispose();
-  },
+ 
   methods:{
-    //initialize cue and balls
+    //liquid
+    onPointerMove() {
+      this.raycaster.setFromCamera(this.pointer.positionN, this.$refs.renderer.three.camera);
+      this.raycaster.ray.intersectPlane(this.pointerPlane, this.pointerV3);
+      const x = 2 * this.pointerV3.x / 20;
+      const y = 2 * -this.pointerV3.z / 20;
+      this.liquidEffect.addDrop(x, y, 0.025, 0.005);
+    },
+
+    //initialize cue
     onBeforeStep(){
       if(this.isInit){
-        this.cue.userData.body.velocity.set(0, 0, 10);
+        this.cue.userData.body.velocity.set(0, 0, 100);
         this.isInit = false;
       }
     },
@@ -193,11 +301,8 @@ export default {
       this.cue = mesh;
       mesh.userData.mass = 20;
     },
-    initBalls(mesh){
-      mesh.userData.mass = 1;
-    },
 
-    //animation logic
+    //model
     onLoad(object) {
       this.mixer = new THREE.AnimationMixer(object);
       const action = this.mixer.clipAction(object.animations[0]);
@@ -214,15 +319,9 @@ export default {
     updateMixer() {
       this.mixer.update(this.clock.getDelta());
     },
-
-    //liquid
-    onPointerMove() {
-      this.raycaster.setFromCamera(this.pointer.positionN, this.$refs.renderer.three.camera);
-      this.raycaster.ray.intersectPlane(this.pointerPlane, this.pointerV3);
-      const x = 2 * this.pointerV3.x / this.WIDTH;
-      const y = 2 * -this.pointerV3.z / this.HEIGHT;
-      this.liquidEffect.addDrop(x, y, 0.025, 0.005);
-    },
+  },
+  unmounted() {
+    this.pane.dispose();
   },
 }
 </script>
