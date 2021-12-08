@@ -31,13 +31,10 @@
         color="#062d89"
         />
 
-      <!-- <FbxModel src="/assets/models/Dying.fbx"
+      <FbxModel src="/assets/models/Dying.fbx"
         @load="onLoad" 
         :position="{y: 5, z: -10}"
-        :scale="{ x: 0.1, y: 0.1, z: 0.1}"/> -->
-      <!-- <GltfModel src="/assets/models/pony_cartoon/scene.gltf" 
-      :position="{y: 5, z: -10}"
-      /> -->
+        :scale="{ x: 0.1, y: 0.1, z: 0.1}"/>
 
       <Plane
       v-for="i in 25"
@@ -55,8 +52,8 @@
 
       <LiquidPlane
         ref="liquid"
-        :width="20"
-        :height="20"
+        :width="width"
+        :height="height"
         :material-props="materialProps"
         :rotation="{ x: -Math.PI / 2 }"/>
 
@@ -95,16 +92,15 @@
           </StandardMaterial> 
         </Box>  
       </CannonWorld>
-     
-      
-     
     </Scene>
   </Renderer>
 </template>
 
 <script>
-//TODO: setAttribute for rain drops
-
+//TODO:
+/*
+Add UI
+Add sound player*/
 import * as THREE from 'three';
 import CannonWorld from 'troisjs/src/components/physics/CannonWorld.js';
 import LiquidPlane from '@troisjs/components/src/liquid/LiquidPlane.js'
@@ -158,7 +154,8 @@ export default {
         wrapS: THREE.RepeatWrapping,
         wrapT: THREE.RepeatWrapping,
       },
-      
+      width: 100,
+      height: 100,
     }
   },
   data(){
@@ -191,10 +188,10 @@ export default {
     this.pane.addInput(this, 'brightness', { min: 0, max: 3 });
     this.pane.addInput(this.materialProps, 'metalness', { min: 0, max: 1 });
     this.pane.addInput(this.materialProps, 'roughness', { min: 0, max: 1 });
-    this.pane.addInput(this.materialProps, 'envMapIntensity', { step: 0.05, min: 0, max: 1 })
 
     //scene core
     const renderer = this.$refs.renderer;
+    const camera = this.$refs.camera.camera;
     const scene = this.$refs.scene.scene;
     const flash = this.$refs.flash.light;
 
@@ -214,30 +211,18 @@ export default {
       size: 0.1,
       transparent: true
     }); 
-      //lower rain
-    let lowerGeo = new THREE.BufferGeometry();
-    let lowerVert = new Float32Array(this.rainCount*3)
+
+    let rainGeo = new THREE.BufferGeometry();
+    let rainVert = new Float32Array(this.rainCount*3)
     for(let i = 0; i < this.rainCount; i++) {
-      lowerVert[i*3] = Math.random() * 400 -200,
-      lowerVert[i*3 + 1] =  Math.random() * 250,
-      lowerVert[i*3 + 2] =  Math.random() * 400 - 200
+      rainVert[i*3] = Math.random() * 400 -200,
+      rainVert[i*3 + 1] =  Math.random() * 250,
+      rainVert[i*3 + 2] =  Math.random() * 400 - 200
     }
-    lowerGeo.setAttribute('position', new THREE.BufferAttribute( lowerVert, 3 ));
-    const lowerRain = new THREE.Points(lowerGeo, rainMaterial);
-      //upper rain
-    let upperGeo = new THREE.BufferGeometry();
-    let upperVert = new Float32Array(this.rainCount*3)
-    for(let i = 0; i < this.rainCount; i++) {
-      upperVert[i*3] = Math.random() * 400 -200,
-      upperVert[i*3 + 1] =  Math.random() * 250,
-      upperVert[i*3 + 2] =  Math.random() * 400 - 200
-    }
-    upperGeo.setAttribute('position', new THREE.BufferAttribute( upperVert, 3 ) );
-    const upperRain = new THREE.Points(upperGeo, rainMaterial);
-    scene.add(lowerRain)
-    scene.add(upperRain)
-    upperRain.position.set(0, 250, 0);
-    
+    rainGeo.setAttribute('position', new THREE.BufferAttribute( rainVert, 3 ));
+    const rain = new THREE.Points(rainGeo, rainMaterial);
+    scene.add(rain)
+ 
     //liquid
     this.liquidEffect = this.$refs.liquid.liquidEffect;
     this.liquidEffect.addDrop(0, 0, 0.05, 0.05);
@@ -246,6 +231,22 @@ export default {
     this.pointerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this.pointerV3 = new THREE.Vector3();
 
+    //Audio
+    /* function initSound(){
+      const listener = new THREE.AudioListener();
+      camera.add( listener );
+      const sound = new THREE.Audio( listener );
+      const audioLoader = new THREE.AudioLoader();
+      audioLoader.load( '/sounds/rain.wav', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( true );
+        sound.setVolume( 0.5 );
+        sound.play();
+      });
+    }
+    initSound() */
+    
+
 
     //ANIMATION LOOP
     renderer.onBeforeRender(() => {
@@ -253,29 +254,28 @@ export default {
       mouse.position.copy(mouseV3);
       //rain
       
-      if (lowerRain.position.y < -300){
-        lowerRain.position.y = 200
+      for(let i = 0; i < this.rainCount; i++){
+        rainVert[i*3 + 1] -= 2
+        if(rainVert[i*3 + 1] < 0){
+          rainVert[i*3 + 1] = 250
+        }
       }
-      if (upperRain.position.y < -300){
-        upperRain.position.y = 200
-      }
-      lowerRain.position.y -= 2
-      upperRain.position.y -= 2
+      rainGeo.setAttribute('position', new THREE.BufferAttribute( rainVert, 3 ));
       
       //cloud
       for (let i = 1; i <= 25; i++) {
         let mesh = this.$refs['mesh'+i].mesh;
-        mesh.rotation.z -= 0.002;
+        mesh.rotation.z -= 0.003;
       }
       //thunder
-      if(Math.random() > 0.93 || flash.power > 100) {
+      if(Math.random() > 0.96 || flash.power > 100) {
         if(flash.power < 100) 
           flash.position.set(
             Math.random()*400,
             300 + Math.random() *200,
             100
           );
-        flash.power = 50 + Math.random() * 500;
+        flash.power = 50 + Math.random() * 300;
       }
     })
   },
@@ -285,8 +285,8 @@ export default {
     onPointerMove() {
       this.raycaster.setFromCamera(this.pointer.positionN, this.$refs.renderer.three.camera);
       this.raycaster.ray.intersectPlane(this.pointerPlane, this.pointerV3);
-      const x = 2 * this.pointerV3.x / 20;
-      const y = 2 * -this.pointerV3.z / 20;
+      const x = 2 * this.pointerV3.x / this.width;
+      const y = 2 * -this.pointerV3.z / this.height;
       this.liquidEffect.addDrop(x, y, 0.025, 0.005);
     },
 
@@ -314,7 +314,7 @@ export default {
         }
       });
       this.clock = new THREE.Clock();
-      this.$refs.renderer.onBeforeRender(this.updateMixer);
+      renderer.onBeforeRender(this.updateMixer);
     },
     updateMixer() {
       this.mixer.update(this.clock.getDelta());
