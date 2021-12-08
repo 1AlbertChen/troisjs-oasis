@@ -2,6 +2,7 @@
   <section id="loading-screen">
     <div id="loader"></div>
   </section>
+  <button @click="toggleSound">MUTED</button>
   <Renderer
     ref="renderer"
     orbit-ctrl
@@ -94,6 +95,10 @@
       </CannonWorld>
     </Scene>
   </Renderer>
+
+  <audio id="mySong">
+    <source src="/assets/sounds/rain.wav" type="audio/wav"/>
+  </audio>
 </template>
 
 <script>
@@ -145,7 +150,15 @@ export default {
       document.getElementById("loading-screen").remove();
     }
 
+    //toggleSound
+    const toggleSound = () =>{
+      let song = document.getElementById("mySong")
+      song.muted = song.muted ? false : true
+    }
+    
+
     return{
+      toggleSound,
       cubeTexture,
       balls,
       initBalls,
@@ -231,21 +244,8 @@ export default {
     this.pointerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this.pointerV3 = new THREE.Vector3();
 
-    //Audio
-    /* function initSound(){
-      const listener = new THREE.AudioListener();
-      camera.add( listener );
-      const sound = new THREE.Audio( listener );
-      const audioLoader = new THREE.AudioLoader();
-      audioLoader.load( '/sounds/rain.wav', function( buffer ) {
-        sound.setBuffer( buffer );
-        sound.setLoop( true );
-        sound.setVolume( 0.5 );
-        sound.play();
-      });
-    }
-    initSound() */
-    
+    var mySong = document.getElementById("mySong")
+    document.onclick = () => mySong.play()
 
 
     //ANIMATION LOOP
@@ -314,7 +314,7 @@ export default {
         }
       });
       this.clock = new THREE.Clock();
-      renderer.onBeforeRender(this.updateMixer);
+      this.$refs.renderer.onBeforeRender(this.updateMixer);
     },
     updateMixer() {
       this.mixer.update(this.clock.getDelta());
