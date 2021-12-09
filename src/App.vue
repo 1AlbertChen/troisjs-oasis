@@ -101,6 +101,7 @@
   </audio>
 </template>
 
+
 <script>
 //TODO:
 /*
@@ -162,17 +163,24 @@ export default {
       cubeTexture,
       balls,
       initBalls,
+      //wood
       texturesProps: {
         repeat: { x: 5, y: 5 },
         wrapS: THREE.RepeatWrapping,
         wrapT: THREE.RepeatWrapping,
-      },
-      width: 100,
-      height: 100,
+      }
     }
   },
   data(){
     return{
+      
+      //cue
+      isInit: true,
+      //light
+      brightness: 0.7,
+      //liquid
+      width: 100,
+      height: 100,
       materialProps: {
         color: 0xffffff,
         metalness: 0.2,
@@ -183,14 +191,6 @@ export default {
         envMap: this.cubeTexture,
         envMapIntensity: 1
       },
-      //init
-      isInit: true,
-      //light
-      brightness: 0.7,
-      //liquid
-      color: 0xffffff,
-      metalness: 0.7,
-      roughness: 0.2,
       //rain
       rainCount: 15000
     }
@@ -320,13 +320,11 @@ export default {
       this.mixer.update(this.clock.getDelta());
     },
   },
-  unmounted() {
-    this.pane.dispose();
-  },
+  
 }
 </script>
 
-<style>
+<style scoped>
 #loading-screen {
 	position: absolute;
 	z-index: 2;
