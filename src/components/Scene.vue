@@ -1,7 +1,7 @@
 <template>
-  <transition name="fade">
+  <!-- <transition name="fade">
     <Loader v-if="loaded" :progress="percent" @initPage="initPage"/>
-  </transition>
+  </transition> -->
   <n-switch @click="toggleSound" style="display: absolute;">
     <template #checked>Play</template>
     <template #unchecked>Mute</template>
@@ -11,40 +11,45 @@
   <Renderer
     ref="renderer"
     orbit-ctrl
+    :pointer="{onMove: onPointerMove}"
     resize="window">
-    <!-- :pointer="{onMove: onPointerMove}" -->
     <Camera ref="camera" :position="{x: 0, y: 100, z: 0}" :far="10000"/>
     <Scene ref="scene">
       <PointLight
         ref="mouse"
-        :intensity="0.5"
+        :intensity="0"
         cast-shadow>
         <Sphere :radius="0.1"/>
       </PointLight>
 
-      <PointLight
+      <!-- <PointLight
         ref="main"
         :color="color"
         :position="{ y: 100 }"
         :intensity="brightnessPt"
+        cast-shadow/> -->
+      <HemisphereLight
+        :color="skycolor"
+        :groundColor="groundcolor"
+        :intensity="brightnessPt"
         cast-shadow/>
 
-      <SpotLight
+      <!-- <SpotLight
         color="#555555"
         :position="{ y: 250 }"
         :distance="500"
         :angle="angle"
         :intensity="brightnessDr"
         :target="{ y: 500 }"
-      />
-      <PointLight
+      /> -->
+      <!-- <PointLight
         ref="flash"
         :position="{x: 200, y: 300, z: 100}"
         :intensity="30"
         :decay="1.7"  
         :distance="500"
         color="#062d89"
-        />
+        /> -->
       <!-- cloud -->
       <Plane
       v-for="i in 25"
@@ -60,24 +65,24 @@
         </StandardMaterial>
       </Plane>
 
-    <!-- <LiquidPlane
-        ref="liquid"
-        :width="width"
-        :height="height"
-        :material-props="materialProps"
-        :rotation="{ x: -Math.PI / 2 }"/> -->
+    <LiquidPlane
+      ref="liquid"
+      :width="width"
+      :height="height"
+      :material-props="materialProps"
+      :rotation="{ x: -Math.PI / 2 }"/>
 
       <Plane
         :rotation="{ x: -Math.PI / 2}"
         :width="1000"
         :height="1000"
-        :widthSegments="500"
-        :heightSegments="500"
-        :position="{x: 0, y: -5, z: 0}"
+        :widthSegments="1000"
+        :heightSegments="1000"
+        :position="{x: 0, y: -10, z: 0}"
         receive-shadow>
-        <StandardMaterial :props="{ displacementScale: 20 }">
-          <Texture :props="texturesProps" src="/assets/textures/beachsand.jpg" />
-          <Texture :props="texturesProps" src="/assets/textures/noiseTexture1.png" name="displacementMap" />
+        <StandardMaterial :props="{ displacementScale: 50 }">
+          <Texture src="/assets/textures/sand.jfif" />
+          <Texture src="/assets/textures/Background.png" name="displacementMap" />
         </StandardMaterial>
       </Plane> 
 
@@ -189,10 +194,14 @@ export default {
       const rainSound = document.getElementById("rainSound")
       rainSound.muted = rainSound.muted ? false : true
     }
+
+    const imageArray = Array(6).fill('/assets/skybox/sky.png')
+    const cubeTexture = new THREE.CubeTextureLoader().load(imageArray)
     return{
-      imageArray,
       loaded,
       percent,
+      cubeTexture,
+      imageArray,
       //balls,
       //initBalls,
       toggleSound,
@@ -202,20 +211,21 @@ export default {
   },
   data(){
     return{
-      //height: 40,
+      skycolor:'#010a1a',
+      groundcolor:'#071021',
       angle: Math.PI,
       color: '#071021',
       //cue
       isInit: true,
-      //light
+      //lights
       brightnessPt: 3,
-      brightnessDr: 5,
+      brightnessDr: 2.5,
       //liquid
       width: 100,
       height: 100,
       materialProps: {
         color: 0xffffff,
-        metalness: 0.2,
+        metalness: 0.15,
         roughness: 0,
         thickness: 4,
         transmission: 1,
@@ -240,35 +250,34 @@ export default {
     this.pane = new Pane();
     this.pane.addInput(this, 'brightnessPt', { min: 0, max: 3 });
     this.pane.addInput(this, 'brightnessDr', { min: 0, max: 5 });
-    this.pane.addInput(this, 'angle', { min: 0, max: Math.PI/2 });
-    this.pane.addInput(this, 'color');
+    this.pane.addInput(this, 'skycolor');
+    this.pane.addInput(this, 'groundcolor');
+    this.pane.addInput(this.materialProps, 'metalness', { step: 0.05, min: 0, max: 1 })
+    this.pane.addInput(this.materialProps, 'roughness', { step: 0.05, min: 0, max: 1 })
+    this.pane.addInput(this.materialProps, 'thickness', { step: 0.05, min: 0, max: 10 })
+    this.pane.addInput(this.materialProps, 'transmission', { step: 0.05, min: 0, max: 1 })
+    this.pane.addInput(this.materialProps, 'displacementScale', { step: 0.5, min: 0.5, max: 50 })
+    this.pane.addInput(this.materialProps, 'envMapIntensity', { step: 0.05, min: 0, max: 1 })
 
     //scene core
     const renderer = this.$refs.renderer;
     const scene = this.$refs.scene.scene;
-    const flash = this.$refs.flash.light;
-    scene.fog = new THREE.Fog(this.color, 100, 800)
+    //const flash = this.$refs.flash.light;
+    scene.fog = new THREE.Fog(this.color, 800, 1000)
     
     //main light helper
-    const main = this.$refs.main.light;
+    /* const main = this.$refs.main.light;
     const lightHelper = new THREE.PointLightHelper(main)
-    scene.add(lightHelper);
+    scene.add(lightHelper); */
     
     //skybox
-    let imageArray = [
-    '/assets/skybox/blizzard_ft.jpg',
-    '/assets/skybox/blizzard_bk.jpg',
-    '/assets/skybox/blizzard_up.jpg',
-    '/assets/skybox/blizzard_dn.jpg',
-    '/assets/skybox/blizzard_rt.jpg',
-    '/assets/skybox/blizzard_lf.jpg',];
+    
     let texture = []
     let material = []
     this.imageArray.forEach((el) => texture.push(new THREE.TextureLoader().load(el)))
     texture.forEach((el) => material.push(new THREE.MeshStandardMaterial( { map: el })))
     for (let i = 0; i < 6; i++)
       material[i].side = THREE.BackSide;
-      
     let skyboxGeo = new THREE.BoxGeometry( 10000, 10000, 10000);
     let skybox = new THREE.Mesh( skyboxGeo, material );
     scene.add( skybox );
@@ -285,56 +294,57 @@ export default {
       transparent: true
     }); 
 
-    let rainGeo = new THREE.BufferGeometry();
-    this.rainVert = new Float32Array(this.rainCount*3)
+    const rainGeo = new THREE.BufferGeometry();
+    let rainVert = new Float32Array(this.rainCount*3)
     for(let i = 0; i < this.rainCount; i++) {
-      this.rainVert[i*3] = Math.random() * 400 -200,
-      this.rainVert[i*3 + 1] =  Math.random() * 250,
-      this.rainVert[i*3 + 2] =  Math.random() * 400 - 200
+      rainVert[i*3] = Math.random() * 400 -200,
+      rainVert[i*3 + 1] =  Math.random() * 250,
+      rainVert[i*3 + 2] =  Math.random() * 400 - 200
     }
-    rainGeo.setAttribute('position', new THREE.BufferAttribute( this.rainVert, 3 ));
-    const rain = new THREE.Points(rainGeo, rainMaterial);
-    scene.add(rain)
+    rainGeo.setAttribute('position', new THREE.BufferAttribute( rainVert, 3 ));
+    this.rain = new THREE.Points(rainGeo, rainMaterial);
+    scene.add(this.rain)
  
     //liquid
-   /*this.liquidEffect = this.$refs.liquid.liquidEffect;
+    this.liquidEffect = this.$refs.liquid.liquidEffect;
     this.liquidEffect.addDrop(0, 0, 0.05, 0.05);
 
     this.raycaster = new THREE.Raycaster();
     this.pointerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    this.pointerV3 = new THREE.Vector3(); */
+    this.pointerV3 = new THREE.Vector3();
 
     //ANIMATION LOOP
     renderer.onBeforeRender(() => {
       //mouse
       mouse.position.copy(mouseV3);
       //rain
-      for(let i = 0; i < this.rainCount; i++){
-        if(this.rainVert[i*3 + 1] < 0 && this.rainVert[i*3 + 1] > -10){
-          this.rainVert[i*3 + 1] = 250
+      const positions = this.rain.geometry.attributes.position.array
+      for(let i = 0; i < this.rainCount; i++ ){
+        if (positions[ 3 * i + 1] > 0){
+          positions[ 3 * i + 1] -= 2
         }
-        this.rainVert[i*3 + 1] -= 2
-        
-        
+        else if (positions[ 3 * i + 1] > -10){
+          positions[ 3 * i + 1] = 250
+        }
       }
-      rainGeo.setAttribute('position', new THREE.BufferAttribute( this.rainVert, 3 ));
-      
+      this.rain.geometry.attributes.position.needsUpdate = true;
+
       //cloud
       for (let i = 1; i <= 25; i++) {
         let mesh = this.$refs['mesh'+i].mesh;
         mesh.rotation.z -= 0.003;
       }
       //Fog
-      this.$refs.scene.scene.fog.color.set(this.color)
+      this.$refs.scene.scene.fog.color.set(this.skycolor)
       //thunder
-      if(Math.random() > 0.96 || flash.power > 100) {
+      /* if(Math.random() > 0.96 || flash.power > 100) {
         if(flash.power < 100) 
           flash.position.set(
             Math.random()*400,
-            300 + Math.random() *200,
+            300 + Math.random() *200,w
             100);
         flash.power = 50 + Math.random() * 300;
-      }
+      } */
     })
   },
 
@@ -343,13 +353,15 @@ export default {
       if(val > old){
         const lessRain = val - old
         for(let i = 0; i < lessRain; i++){
-          this.rainVert[(this.rainUnder - lessRain + i )*3 + 1] = -50 //banished to the shadow realm
+          this.rain.geometry.attributes.position.needsUpdate = true;
+          this.rain.geometry.attributes.position.setY(this.rainUnder - lessRain + i, -50)
         }
       }
       else{
         const moreRain = old - val
         for(let i = 0; i < moreRain; i++){
-          this.rainVert[(this.rainUnder + i)*3 + 1] = Math.random() * 250
+          this.rain.geometry.attributes.position.needsUpdate = true;
+          this.rain.geometry.attributes.position.setY(this.rainUnder + i, Math.random() * 250)
         }
       }
 
@@ -358,13 +370,13 @@ export default {
  
   methods:{
     //liquid
-    /* onPointerMove() {
+    onPointerMove() {
       this.raycaster.setFromCamera(this.pointer.positionN, this.$refs.renderer.three.camera);
       this.raycaster.ray.intersectPlane(this.pointerPlane, this.pointerV3);
       const x = 2 * this.pointerV3.x / this.width;
       const y = 2 * -this.pointerV3.z / this.height;
       this.liquidEffect.addDrop(x, y, 0.025, 0.005);
-    }, */
+    },
 
     //initialize cue
     onBeforeStep(){
