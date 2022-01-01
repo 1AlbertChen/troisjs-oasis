@@ -2,18 +2,21 @@
   <!-- <transition name="fade">
     <Loader v-if="loaded" :progress="percent" @initPage="initPage"/>
   </transition> -->
-  <n-switch @click="toggleSound" style="display: absolute;">
+  <n-switch @click="toggleSound" style="position: absolute;left: 200px;">
     <template #checked>Play</template>
     <template #unchecked>Mute</template>
   </n-switch>
-  <button @click="rainUnder += 2000">LESS</button>
-    <button @click="rainUnder -= 2000">MOAR</button>
   <Renderer
     ref="renderer"
-    orbit-ctrl
+    antialias
     :pointer="{onMove: onPointerMove}"
+    @wheel="e => loaded && onScroll(e)"
     resize="window">
-    <Camera ref="camera" :position="{x: 0, y: 100, z: 0}" :far="10000"/>
+    <Camera
+      ref="camera"
+      :position="{x: 100, y: 100, z: 100}"
+      :far="10000"
+      :lookAt="{x: 0, y: 0, z: 0}" />
     <Scene ref="scene">
       <PointLight
         ref="mouse"
@@ -21,27 +24,21 @@
         cast-shadow>
         <Sphere :radius="0.1"/>
       </PointLight>
-
-      <!-- <PointLight
-        ref="main"
-        :color="color"
-        :position="{ y: 100 }"
-        :intensity="brightnessPt"
-        cast-shadow/> -->
+      
       <HemisphereLight
         :color="skycolor"
         :groundColor="groundcolor"
         :intensity="brightnessPt"
         cast-shadow/>
 
-      <!-- <SpotLight
+      <SpotLight
         color="#555555"
-        :position="{ y: 250 }"
-        :distance="500"
         :angle="angle"
+        :distance="500"
         :intensity="brightnessDr"
-        :target="{ y: 500 }"
-      /> -->
+        :position="{ y: 250 }"
+        :target="{y: 500}"
+      />
       <!-- <PointLight
         ref="flash"
         :position="{x: 200, y: 300, z: 100}"
@@ -50,6 +47,21 @@
         :distance="500"
         color="#062d89"
         /> -->
+      <GltfModel  src="/assets/models/plants/tree.glb"
+        :position="{x: 40}" :scale="{x: 3, y: 3, z: 3}" />
+      <GltfModel  src="/assets/models/plants/tree2.glb"
+        :position="{x: -40}" :scale="{x: 3, y: 3, z: 3}"/>
+      <GltfModel  src="/assets/models/plants/grass/scene.gltf"
+        :position="{x: 20}" :scale="{x: 0.5, y: 0.5, z: 0.5}"/>
+      <GltfModel  src="/assets/models/plants/agave.glb"
+        :position="{x: 20}" :scale="{x: 0.5, y: 0.5, z: 0.5}"/>
+      <GltfModel src="/assets/models/plants/cactus-ball.glb"
+        :position="{x: 0}" :scale="{x: 0.5, y: 0.5, z: 0.5}"/>
+      <GltfModel  src="/assets/models/plants/cactus.glb"
+        :position="{z: -60}" :scale="{x: 0.1, y: 0.1, z: 0.1}"/>
+      <GltfModel  src="/assets/models/plants/bush.glb"
+        :position="{z: 30}" :scale="{x: 10, y: 10, z: 10}"/>
+
       <!-- cloud -->
       <Plane
       v-for="i in 25"
@@ -71,60 +83,26 @@
       :height="height"
       :material-props="materialProps"
       :rotation="{ x: -Math.PI / 2 }"/>
-
       <Plane
         :rotation="{ x: -Math.PI / 2}"
-        :width="1000"
-        :height="1000"
-        :widthSegments="1000"
-        :heightSegments="1000"
-        :position="{x: 0, y: -10, z: 0}"
+        :width="800"
+        :height="800"
+        :widthSegments="64"
+        :heightSegments="64"
+        :position="{x: 0, y: elevation, z: 0}"
         receive-shadow>
-        <StandardMaterial :props="{ displacementScale: 50 }">
+        <StandardMaterial :props="{ displacementScale: scale }">
           <Texture src="/assets/textures/sand.jfif" />
           <Texture src="/assets/textures/Background.png" name="displacementMap" />
         </StandardMaterial>
       </Plane> 
 
-      <CannonWorld :gravity="{ x: 0, y: -9.82, z: 0}" @before-step="onBeforeStep"> 
-        <!-- <Sphere
-          v-for="item in balls"
-          :position="item.position"
-          :radius="1"
-          :widthSegments="30"
-          :heightSegments="30"
-          @created="initBalls"
-          cast-shadow>
-          <PhongMaterial :color="item.color" />
-        </Sphere>
-        <Sphere
-          :position="{x: 0, y: 1, z: -20}"
-          :radius="1"
-          :widthSegments="30"
-          :heightSegments="30"
-          @created="initCue"
-          cast-shadow>
-          <PhongMaterial color="#ffffff" />
-        </Sphere> -->
-        <!-- <Box
-          :width="20"
-          :depth="20"
-          :position="{x:0, y: -10, z: 0}"
-          receive-shadow>
-           <StandardMaterial :props="{ displacementScale: 0.2 }">
-            <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_basecolor.jpg" />
-            <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_height.png" name="displacementMap" />
-            <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_normal.jpg" name="normalMap" />
-            <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_roughness.jpg" name="roughnessMap" />
-            <Texture :props="texturesProps" src="/assets/textures/Wood_Tiles_002_ambientOcclusion.jpg" name="aoMap" />
-          </StandardMaterial> 
-        </Box>  --> 
-      </CannonWorld>
+      
     </Scene>
   </Renderer>
 
   <audio id="rainSound" loop>
-    <source src="/assets/sounds/rain.wav" type="audio/wav"/>
+    <source src="/assets/sounds/thunderstorm.wav" type="audio/wav"/>
   </audio>
 </template>
 
@@ -132,7 +110,7 @@
 import * as THREE from 'three';
 import {ref} from 'vue';
 import CannonWorld from 'troisjs/src/components/physics/CannonWorld.js';
-import LiquidPlane from '@troisjs/components/src/liquid/LiquidPlane.js'
+import LiquidPlane from '@troisjs/components/src/liquid/LiquidPlane.js';
 import {Pane} from 'tweakpane';
 /* import niceColors from 'nice-color-palettes'; */
 import Loader from './Loader.vue';
@@ -145,23 +123,6 @@ export default {
     NSwitch
   },
   setup(){
-    
-    //balls
-    /* const RANKS = 13;
-    let coords = [];
-    for (let i = 0; i <= RANKS; i++){
-      for (let j = -i; j <= i; j+=2){
-        coords.push({x: j, y: 1, z: i * Math.sqrt(3)});
-      }
-    } 
-    const colors = new Array(coords.length).fill().map(() => niceColors[20][Math.floor(THREE.MathUtils.randFloat(0, 5))]);
-    let balls = [];
-    for (var i = 0; i < coords.length; i++){
-      balls.push({position: coords[i], color: colors[i]});
-    }
-
-    const initBalls = (mesh) => {mesh.userData.mass = 1} */
-
     //Loading Manager
     const percent = ref(0)
     THREE.DefaultLoadingManager.onProgress = function (url, itemsLoaded, itemsTotal){
@@ -176,11 +137,16 @@ export default {
       audio.play()
       audio.volume = 0
       audioFade()
-      
     }
-
+    //scroll control
+    const vPosition = ref(0)
+    const onScroll = ev => {
+      const delY = ev.deltaY
+      vPosition.value += delY
+      vPosition.value = Math.min(Math.max(0, vPosition.value), 1000);
+      console.log(vPosition.value)
+    }
     //sound control
-
     const audioFade = () =>{
       const myAudio = document.getElementById("rainSound");
       let timer;
@@ -197,81 +163,81 @@ export default {
 
     const imageArray = Array(6).fill('/assets/skybox/sky.png')
     const cubeTexture = new THREE.CubeTextureLoader().load(imageArray)
+
+   
     return{
+      vPosition,
+      onScroll,
       loaded,
       percent,
       cubeTexture,
       imageArray,
-      //balls,
-      //initBalls,
       toggleSound,
       initPage,
-      audioFade
+      audioFade,
     }
   },
   data(){
     return{
-      skycolor:'#010a1a',
-      groundcolor:'#071021',
-      angle: Math.PI,
-      color: '#071021',
-      //cue
-      isInit: true,
+      //ground
+      elevation: -12,
+      scale: 30,
       //lights
-      brightnessPt: 3,
-      brightnessDr: 2.5,
+      skycolor:'#010a1a',
+        //'#CCC7B0',
+      groundcolor:'#071021',
+        //'#ffffff',
+      brightnessPt: 1,
+      brightnessDr: 5,
+      angle: Math.PI/2,
       //liquid
-      width: 100,
-      height: 100,
+      width: 150,
+      height: 150,
       materialProps: {
         color: 0xffffff,
         metalness: 0.15,
         roughness: 0,
-        thickness: 4,
+        thickness: 1,
         transmission: 1,
         displacementScale: 20,
+        reflectivity: 0.5,
         envMap: this.cubeTexture,
-        envMapIntensity: 1
-      },
-      //wood
-      texturesProps: {
-        repeat: { x: 5, y: 5 },
-        wrapS: THREE.RepeatWrapping,
-        wrapT: THREE.RepeatWrapping,
+        envMapIntensity: 0.5
       },
       //rain
       rainVert: [],
-      rainCount: 10000,
-      rainUnder: 0
+      rainCount: 5000,
+      rainUnder: 0,
     }
   },
   mounted() {
+    (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
     //tweakpane
     this.pane = new Pane();
     this.pane.addInput(this, 'brightnessPt', { min: 0, max: 3 });
     this.pane.addInput(this, 'brightnessDr', { min: 0, max: 5 });
+    this.pane.addInput(this, 'angle', { min: 0, max: Math.PI });
     this.pane.addInput(this, 'skycolor');
     this.pane.addInput(this, 'groundcolor');
     this.pane.addInput(this.materialProps, 'metalness', { step: 0.05, min: 0, max: 1 })
+    this.pane.addInput(this.materialProps, 'reflectivity', { step: 0.05, min: 0, max: 1 })
     this.pane.addInput(this.materialProps, 'roughness', { step: 0.05, min: 0, max: 1 })
     this.pane.addInput(this.materialProps, 'thickness', { step: 0.05, min: 0, max: 10 })
     this.pane.addInput(this.materialProps, 'transmission', { step: 0.05, min: 0, max: 1 })
     this.pane.addInput(this.materialProps, 'displacementScale', { step: 0.5, min: 0.5, max: 50 })
     this.pane.addInput(this.materialProps, 'envMapIntensity', { step: 0.05, min: 0, max: 1 })
+    this.pane.addInput(this, 'width', { min: 0, max: 1000 })
+    this.pane.addInput(this, 'height', { min: 0, max: 1000 })
+    /* this.pane.addInput(this, 'scale', { min: 0, max: 100 });
+    this.pane.addInput(this, 'elevation', { min: -20, max: 0 }); */
+    
+    //scene core ***
+    const renderer = this.$refs.renderer
+    const scene = this.$refs.scene.scene
+    const camera = this.$refs.camera.cameras
+    scene.fog = new THREE.Fog(this.color, 1, 800)
 
-    //scene core
-    const renderer = this.$refs.renderer;
-    const scene = this.$refs.scene.scene;
-    //const flash = this.$refs.flash.light;
-    scene.fog = new THREE.Fog(this.color, 800, 1000)
-    
-    //main light helper
-    /* const main = this.$refs.main.light;
-    const lightHelper = new THREE.PointLightHelper(main)
-    scene.add(lightHelper); */
-    
-    //skybox
-    
+    //skybox ***
     let texture = []
     let material = []
     this.imageArray.forEach((el) => texture.push(new THREE.TextureLoader().load(el)))
@@ -287,7 +253,7 @@ export default {
     this.pointer = renderer.three.pointer
     const mouseV3 = this.pointer.positionV3;
 
-    //rain
+    //rain ***
     const rainMaterial = new THREE.PointsMaterial({
       color: 0xaaaaaa,
       size: 0.1,
@@ -313,6 +279,7 @@ export default {
     this.pointerPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this.pointerV3 = new THREE.Vector3();
 
+   //***** */ const flash = this.$refs.flash.light;
     //ANIMATION LOOP
     renderer.onBeforeRender(() => {
       //mouse
@@ -335,13 +302,14 @@ export default {
         mesh.rotation.z -= 0.003;
       }
       //Fog
-      this.$refs.scene.scene.fog.color.set(this.skycolor)
+      const fog = this.$refs.scene.scene.fog
+      fog.color.set(this.skycolor)
       //thunder
-      /* if(Math.random() > 0.96 || flash.power > 100) {
+      /* if(Math.random() > 0.98 || flash.power > 100) {
         if(flash.power < 100) 
           flash.position.set(
             Math.random()*400,
-            300 + Math.random() *200,w
+            300 + Math.random() *200,
             100);
         flash.power = 50 + Math.random() * 300;
       } */
@@ -350,21 +318,20 @@ export default {
 
   watch:{
     rainUnder(val, old){
+      const positions = this.rain.geometry.attributes.position.array
       if(val > old){
         const lessRain = val - old
         for(let i = 0; i < lessRain; i++){
-          this.rain.geometry.attributes.position.needsUpdate = true;
-          this.rain.geometry.attributes.position.setY(this.rainUnder - lessRain + i, -50)
+          positions[ 3 * (this.rainUnder - lessRain + i) + 1] = -50
         }
       }
       else{
         const moreRain = old - val
         for(let i = 0; i < moreRain; i++){
-          this.rain.geometry.attributes.position.needsUpdate = true;
-          this.rain.geometry.attributes.position.setY(this.rainUnder + i, Math.random() * 250)
-        }
+          positions[ 3 * (this.rainUnder  + i) + 1] = Math.random() * 250
+       }
       }
-
+      this.rain.geometry.attributes.position.needsUpdate = true;
     }
   },
  
@@ -377,36 +344,6 @@ export default {
       const y = 2 * -this.pointerV3.z / this.height;
       this.liquidEffect.addDrop(x, y, 0.025, 0.005);
     },
-
-    //initialize cue
-    onBeforeStep(){
-      /* if(this.isInit){
-        this.cue.userData.body.velocity.set(0, 0, 100);
-        this.isInit = false;
-      } */
-    },
-    /* initCue(mesh){
-      this.cue = mesh;
-      mesh.userData.mass = 20;
-    },
- */
-    //model
-    /* onLoad(object) {
-      this.mixer = new THREE.AnimationMixer(object);
-      const action = this.mixer.clipAction(object.animations[0]);
-      action.play();
-      object.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-        }
-      });
-      this.clock = new THREE.Clock();
-      this.$refs.renderer.onBeforeRender(this.updateMixer);
-    },
-    updateMixer() {
-      this.mixer.update(this.clock.getDelta());
-    }, */
   },
   
 }
@@ -419,5 +356,4 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-
 </style>
