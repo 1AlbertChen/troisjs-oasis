@@ -1,0 +1,62 @@
+*{
+  font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a{
+  text-decoration: inherit;
+  color: inherit;
+}
+canvas {
+  display: block;
+}
+.absolute{
+  position: absolute
+}
+.center{
+  transform: translate(-50%, 0);
+  left: 50%;
+}
+.menu{
+  text-align: center;
+}
+.menu h1,p,h2{
+  color: white;
+}
+.menu h1{
+  margin: 0 auto 5px;
+}
+.menu p{
+  margin: 2vh auto 0;
+}
+.btn::before{
+  content:'';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--border-height);
+  background-color: white;
+  transition: transform 300ms ease-in-out;
+  transform: scaleX(0);
+}
+.btn:hover::before,
+.btn:focus::before{
+  transform: scaleX(1);
+}
+
+
+.switch-enter-from,
+.switch-leave-to{
+  opacity:0; 
+}
+.switch-enter-to,
+.switch-leave-from{
+  opacity:1;
+}
+.switch-enter-active,
+.switch-leave-active{
+  transition: all var(--transition-time) ease;
+}

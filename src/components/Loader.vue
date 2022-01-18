@@ -37,9 +37,12 @@
       </div>
       
       <div class="text">
-        I HOPE YOUR GPU IS GOOD...
         <transition name="switch" mode="out-in">
-          <n-progress rogress
+          <div v-if="props.progress < 100">LOADING RESOURCES...</div>
+          <div v-else="props.progress < 100">LOADING COMPLETE...</div>
+        </transition>
+        <transition name="switch" mode="out-in">
+          <n-progress
           v-if="props.progress < 100"
           id="progress"
           type="line"
@@ -50,7 +53,7 @@
           :show-indicator="false"
           processing/>
           <n-button
-            style="margin-top: 15px;font-weight:bold"
+            style="font-weight:bold; margin-top: 10px"
             text-color="#9CA6B8"
             color="#192E41"
             :bordered="false"
@@ -77,20 +80,10 @@ const emit = defineEmits(['initPage']);
   margin: auto;
   margin-top: 20px;
 }
-
-.switch-enter-from,
-.switch-leave-to{
-  opacity:0; 
-}
-.switch-enter-to,
-.switch-leave-from{
-  opacity:1;
-}
 .switch-enter-active,
 .switch-leave-active{
-  transition: all 2s ease;
+  --transition-time: 0.5s;
 }
-
 #loading-screen {
 	position: absolute;
 	z-index: 2;
@@ -163,7 +156,6 @@ path {
   }
 }
 
-/* Rain */
 .rain {
   position: absolute;
   width: 70px;
@@ -244,7 +236,6 @@ path {
   }
 }
 .text {
-	font-family: Helvetica, 'Helvetica Neue', sans-serif;
 	letter-spacing: 1px;
 	text-align: center;
 	margin-left: -43px;
