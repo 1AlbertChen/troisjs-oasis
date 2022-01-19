@@ -22,12 +22,14 @@
     </Icon>
   </div>
 </template>
+
 <script setup>
 import { NButton} from 'naive-ui'
 import { WeatherRainShowersDay24Filled } from '@vicons/fluent'
 import { Icon } from '@vicons/utils'
 const emits = defineEmits(['changeContent'])
 </script>
+
 <style scoped>
 .line{
   height: 10vh;
@@ -35,10 +37,8 @@ const emits = defineEmits(['changeContent'])
   background-color: white;
   margin: 1vh auto;
 }
-
 .btn{
   --border-height: 3px;
 }
-
 
 </style>

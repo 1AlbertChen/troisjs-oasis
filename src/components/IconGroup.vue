@@ -41,6 +41,7 @@
     </n-button>
   </div>
 </template>
+
 <script setup>
 import { computed } from 'vue'
 import { NButton} from 'naive-ui'
@@ -54,6 +55,3 @@ const props = defineProps({
 const emit = defineEmits(['relocate'])
 const iconColor = computed(() => (props.vPosition > 15000) ? '#4d290b' : 'white')
 </script>
-
-<style scoped>
-</style>

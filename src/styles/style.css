@@ -22,7 +22,7 @@ canvas {
 .menu{
   text-align: center;
 }
-.menu h1,p,h2{
+.menu h1, p, h2{
   color: white;
 }
 .menu h1{
@@ -47,16 +47,3 @@ canvas {
   transform: scaleX(1);
 }
 
-
-.switch-enter-from,
-.switch-leave-to{
-  opacity:0; 
-}
-.switch-enter-to,
-.switch-leave-from{
-  opacity:1;
-}
-.switch-enter-active,
-.switch-leave-active{
-  transition: all var(--transition-time) ease;
-}

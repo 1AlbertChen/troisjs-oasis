@@ -45,8 +45,8 @@
 import { Html5, Css3, React } from '@vicons/fa'
 import { LogoJavascript } from '@vicons/ionicons5'
 import { Icon } from '@vicons/utils'
-import { NButton } from 'naive-ui'
 </script>
+
 <style scoped>
 img{
   height: 24px;

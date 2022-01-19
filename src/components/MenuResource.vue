@@ -16,12 +16,13 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { NTooltip } from 'naive-ui'
 const icons = [
   {
     name: "vite.svg",
-    message: "Vite.js. Vite means fast in French. Build your next website faster than France falling in 1940!",
+    message: "Vite.js. Vite means fast in French, and this thing is insanely fast!",
     link: "https://vitejs.dev/",
   },
   {
@@ -51,6 +52,7 @@ const icons = [
   },
 ]
 </script>
+
 <style scoped>
 img{
   height: 48px;

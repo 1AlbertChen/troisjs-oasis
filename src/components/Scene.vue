@@ -191,10 +191,6 @@
       </InstancedMesh>
 
     </Scene>
-    <!-- <EffectComposer>
-      <RenderPass />
-      <UnrealBloomPass :strength="0.3" />
-    </EffectComposer> -->
   </Renderer>
 
   <audio ref="rainSound" loop>
@@ -214,7 +210,6 @@ import { MathUtils, Object3D, Vector3 } from 'three';
 import {ref, computed, watch} from 'vue';
 import { NButton, NProgress} from 'naive-ui'
 import { Water } from 'three/examples/jsm/objects/Water.js';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import Loader from './Loader.vue';
 import IconGroup from './IconGroup.vue'
 import Menu from './Menu.vue'
@@ -569,10 +564,10 @@ export default {
 
       if (this.vPosition < 2000){
         this.camera.position.set(65 * this.vPosition/2000 + 85, 55 * this.vPosition/2000 + 5 + this.mouseY, 40 * this.vPosition/2000 - 40)
-        this.camera.lookAt(0, 75 - 55 * this.vPosition/2000, 0)
+        this.camera.lookAt(0, 75 - 55 * this.vPosition/2000, -30 * this.vPosition/2000)
       } else if (this.vPosition < 2400){
         this.camera.position.y = 60 + this.mouseY
-        this.camera.lookAt(0, 20, -50 * (this.vPosition - 2000)/400)
+        this.camera.lookAt(0, 20,  - 30 - 20 * (this.vPosition - 2000)/400)
       } else if (this.vPosition < 9000){
         this.camera.position.y = 60 + 40 * ((this.vPosition - 2400)/6600) + this.mouseY
         this.camera.lookAt(30 * (this.vPosition - 2400)/6600, 20, - 50 + 80 * (this.vPosition - 2400)/6600)
@@ -692,33 +687,8 @@ export default {
 </script>
 
 <style scoped>
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.fade-leave-to {
-  opacity: 0;
-}
 .switch-enter-active,
 .switch-leave-active{
   --transition-time: 1s;
-}
-.text-enter-from,
-.text-leave-to{
-  opacity:0; 
-}
-.text-enter-to,
-.text-leave-from{
-  opacity:1;
-}
-.text-enter-to{
-  letter-spacing: normal;
-}
-.text-enter-from{
-  letter-spacing: 25px;
-}
-
-.text-enter-active,
-.text-leave-active{
-  transition: all 2s ease;
 }
 </style>

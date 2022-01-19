@@ -8,7 +8,5 @@
     margin: 5px auto 0;"></div>
   </div>
 </template>
-<script>
+<script setup>
 </script>
-<style>
-</style>
