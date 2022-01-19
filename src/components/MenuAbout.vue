@@ -23,7 +23,7 @@
         <React />
       </Icon>
       <a href="https://threejs.org/">
-        <img src="/assets/icons/threejs.jpg"/>
+        <img src="../../assets/icons/threejs.jpg"/>
       </a>
       <img src="https://img.icons8.com/color/48/000000/python--v1.png" />
       <img src="https://img.icons8.com/color/48/000000/java-coffee-cup-logo--v1.png" />
