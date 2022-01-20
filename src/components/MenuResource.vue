@@ -8,7 +8,7 @@
         trigger="hover">
         <template #trigger>
           <a :href="item.link">
-            <img :src="'../../assets/icons/'+ item.name">
+            <img :src="'/assets/icons/'+ item.name">
           </a> 
         </template>
         {{item.message}}

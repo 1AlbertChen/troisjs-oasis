@@ -106,14 +106,14 @@
       />
 
       <GltfModel
-        src="../../assets/models/plants/tree.glb"
+        src="/assets/models/plants/tree.glb"
         v-for="item in tree"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
         :scale="{x: item.scale, y: item.scale, z: item.scale}" @load="onLoad"/>
 
       <GltfModel
-        src="../../assets/models/plants/cactus.glb"
+        src="/assets/models/plants/cactus.glb"
         v-for="item in cactus"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
@@ -121,7 +121,7 @@
         @load="onLoad"/>
         
       <GltfModel
-        src="../../assets/models/plants/agave.glb"
+        src="/assets/models/plants/agave.glb"
         v-for="item in agave"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
@@ -129,13 +129,13 @@
         @load="onLoad"/>
 
       <GltfModel
-        src="../../assets/models/plants/bushjr.glb"
+        src="/assets/models/plants/bushjr.glb"
         v-for="item in bush"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
         :scale="{x: item.scale, y: item.scale, z: item.scale}"/>
       <GltfModel
-        src="../../assets/models/plants/cactus-ball.glb"
+        src="/assets/models/plants/cactus-ball.glb"
         v-for="item in cactusBall"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
@@ -143,14 +143,14 @@
         @load="onLoad"/>
       
       <GltfModel
-        src="../../assets/models/plants/blob.glb"
+        src="/assets/models/plants/blob.glb"
         v-for="item in grass"
         :position="item" 
         :rotation="{y: Math.random() * 360}" 
         :scale="{x: 2, y: 2, z: 2}"
         @load="onLoad"/>
       <GltfModel
-        src="../../assets/models/plants/line.glb"
+        src="/assets/models/plants/line.glb"
         v-for="item in line"
         :position="item.position" 
         :rotation="{y: item.rotation}" 
@@ -167,7 +167,7 @@
       :rotation="{x: Math.PI/2, y: 0, z: Math.random()*360}">
         <StandardMaterial
         :props="{transparent: true, opacity: 0.6, depthWrite:false}">
-          <Texture src="../../assets/textures/smoke.png" />
+          <Texture src="/assets/textures/smoke.png" />
         </StandardMaterial>
       </Plane>
 
@@ -180,8 +180,8 @@
         :position="{x: 0, y: -12, z: 0}"
         receive-shadow>
         <StandardMaterial :props="{ displacementScale: 30}">
-          <Texture src="../../assets/textures/sand.jfif" />
-          <Texture src="../../assets/textures/background.png" name="displacementMap" />
+          <Texture src="/assets/textures/sand.jfif" />
+          <Texture src="/assets/textures/background.png" name="displacementMap" />
         </StandardMaterial>
       </Plane>
 
@@ -194,13 +194,13 @@
   </Renderer>
 
   <audio ref="rainSound" loop>
-    <source src="../../assets/sounds/rain.wav" type="audio/wav"/>
+    <source src="/assets/sounds/rain.wav" type="audio/wav"/>
   </audio>
   <audio ref="chimes" loop>
-    <source src="../../assets/sounds/chimes.wav" type="audio/wav"/>
+    <source src="/assets/sounds/chimes.wav" type="audio/wav"/>
   </audio>
   <audio ref="desertSound" loop>
-    <source src="../../assets/sounds/desert.wav" type="audio/wav"/>
+    <source src="/assets/sounds/desert.wav" type="audio/wav"/>
   </audio>
 </template>
 
@@ -354,7 +354,7 @@ export default {
     const soundMuted = ref(false)
     
     //textures
-    const imageArray = Array(6).fill('../../assets/skybox/sky.png')
+    const imageArray = Array(6).fill('/assets/skybox/sky.png')
     //Model
     const onLoad = model =>{
       model.traverse(function (child) {
@@ -540,7 +540,7 @@ export default {
         {
           textureWidth: 1000,
           textureHeight: 1000,
-          waterNormals: new THREE.TextureLoader().load( '../../assets/textures/water.jpg', function ( texture ) {
+          waterNormals: new THREE.TextureLoader().load( '/assets/textures/water.jpg', function ( texture ) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
           } ),
           waterColor: this.groundcolor,
