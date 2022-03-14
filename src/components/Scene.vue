@@ -34,7 +34,7 @@
   </transition>
 
   <transition name="switch">
-    <div class="absolute" style="color: white; width: 450px; left: 100px; top: 140px;"
+    <div class="absolute" style="color: white; width: 450px; left: 100px; top: 20%;"
     v-if="vPosition> 14000 && vPosition < 16000"
      @wheel="e => !loaded && onScroll(e)">
       <h1 style="font-size: 48px;">THE 3D WEB</h1>
