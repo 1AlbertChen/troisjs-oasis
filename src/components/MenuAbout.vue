@@ -1,8 +1,8 @@
 <template>
   <div class="menu" style="width: 500px"> 
     <h1>About Me</h1>
-    <p>My name is Albert Chen. I'm a currently in the middle of my gap year before grad school and working as a software engineer intern in Shanghai, China.
-    During my undergraduate years, I studied physics at Emory and Northwestern. 
+    <p>My name is Albert Chen. I'm a graduate electrical engineering student at UCLA.
+    I studied physics at Northwestern University as an undergrad. 
     </p>
     <p>I enjoy web development, computer graphics, and computational physics. Visit my <a href="https://github.com/1AlbertChen"><u>GitHub</u></a> page and checkout my programming projects.</p>
     <p>This website is built with <a href="https://troisjs.github.io/"><u>TroisJS</u></a>, a Vue framework for Three.js. I contribute to this open-source framework in my spare time.</p>
